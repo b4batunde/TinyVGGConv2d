@@ -53,7 +53,6 @@ class ImageClassifier(nn.Module):
         tnsr = self.blockTwo(tnsr)
         tnsr = self.classifier(tnsr)
         return tnsr
-    
 def plot_predictions(model, dataset):
     model.eval()
     rand_loader = DataLoader(dataset, batch_size=32, shuffle=True)
@@ -61,7 +60,6 @@ def plot_predictions(model, dataset):
     with torch.no_grad():
         y_pred = model(X_batch)
         predicted_labels = torch.argmax(y_pred, dim=1)
-    
     classes = [
     "T-shirt/top",
     "Trouser",
@@ -73,7 +71,6 @@ def plot_predictions(model, dataset):
     "Sneaker",
     "Bag",
     "Ankle boot"]
-
     plt.figure(figsize=(10, 10))
     for i in range(32):
         plt.subplot(8, 4, i+1)
@@ -85,10 +82,6 @@ def plot_predictions(model, dataset):
         plt.axis('off')
     plt.tight_layout()
     plt.show()
-
-
-
-
 trainData = datasets.FashionMNIST(
     root = "Data",
     train = True,
@@ -96,7 +89,6 @@ trainData = datasets.FashionMNIST(
     transform = ToTensor(),
     target_transform = None
 )
-
 testData = datasets.FashionMNIST(
     root = "Data",
     train = False,
@@ -104,31 +96,23 @@ testData = datasets.FashionMNIST(
     transform = ToTensor(),
     target_transform = None
 )
-
 trainDataLoader = DataLoader(
     dataset = trainData,
     batch_size = 32,
     shuffle = True
 )
-
 testDataLoader = DataLoader(
     dataset = testData,
     batch_size = 32,
     shuffle = False
 )
-
 classes = testData.classes
-
 model = ImageClassifier()
 lossFunction = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(params = model.parameters(), lr = 0.001)
-
 epochs = 5
-
 totalSteps = epochs * len(trainDataLoader)
-
 losses = []
-
 with tqdm(total = totalSteps, desc = "Training Progress") as pbar:
     for epoch in range(epochs):
         model.train()
@@ -143,10 +127,8 @@ with tqdm(total = totalSteps, desc = "Training Progress") as pbar:
             pbar.update(1)
         averageLoss = trainLossBatch / len(trainDataLoader)
         losses.append(f"Epoch {epoch + 1}/{epochs} - Loss: {averageLoss:.4f}")
-
 for _ in losses:
     print(_)
-
 yPredList = []
 model.eval()
 with torch.inference_mode():
@@ -154,23 +136,16 @@ with torch.inference_mode():
         yTestLogitPred = model(X)
         yPred = torch.argmax(yTestLogitPred, dim = 1)
         yPredList.append(yPred)
-
 yPredTensor = torch.cat(yPredList)
-
-
 plot_predictions(model = model, dataset = trainData)
-
-
 confusionMatrix = ConfusionMatrix(task="multiclass", num_classes=len(classes))
 confusionMatrixTensor = confusionMatrix(
     preds = yPredTensor,
     target = testData.targets
 )
-
 figure, axis = plot_confusion_matrix(
     conf_mat = confusionMatrixTensor.numpy(),
     class_names = classes,
     figsize = (10, 10)
-
 )
 plt.show()
